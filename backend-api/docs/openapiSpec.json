@@ -1,0 +1,1266 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CineVerse API",
+    "version": "1.0.0",
+    "description": "API documentation for the CineVerse web application."
+  },
+  "servers": [{
+    "url": "http://localhost:3000/api",
+    "description": "Development server"
+  }],
+  "tags": [{
+      "name": "Authentication",
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "Movies",
+      "description": "Operations related to movies and anime"
+    },
+    {
+      "name": "Users",
+      "description": "User profile management"
+    },
+    {
+      "name": "Reviews",
+      "description": "Movie/anime reviews and ratings"
+    },
+    {
+      "name": "Watchlists",
+      "description": "User watchlists"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "testuser"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Log in a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies": {
+      "get": {
+        "tags": [
+          "Movies"
+        ],
+        "summary": "Get all movies or filter them",
+        "parameters": [{
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "movie",
+                "tv_series"
+              ]
+            },
+            "description": "Filter by movie type"
+          },
+          {
+            "name": "genre_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by genre ID"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by movie title"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of movies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoviesListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Movies"
+        ],
+        "summary": "Create a new movie (Admin only)",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Movie created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden (not admin)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies/{id}": {
+      "get": {
+        "tags": [
+          "Movies"
+        ],
+        "summary": "Get movie by ID",
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": "ID of the movie"
+        }],
+        "responses": {
+          "200": {
+            "description": "Movie details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieSuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's profile",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reviews/movies/{movieId}": {
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Create a new review for a movie",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "parameters": [{
+          "name": "movieId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watchlists": {
+      "get": {
+        "tags": [
+          "Watchlists"
+        ],
+        "summary": "Get current user's watchlist",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "parameters": [{
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "watching",
+                "completed",
+                "plan_to_watch",
+                "dropped"
+              ]
+            },
+            "description": "Filter by watch status"
+          },
+          {
+            "name": "movie_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "movie",
+                "tv_series"
+              ]
+            },
+            "description": "Filter by movie/anime type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User's watchlist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistItemsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Watchlists"
+        ],
+        "summary": "Add or update an item in the user's watchlist",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Watchlist item updated/added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistItemSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watchlists/{movieId}": {
+      "get": {
+        "tags": [
+          "Watchlists"
+        ],
+        "summary": "Get a specific movie's status in user's watchlist",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "parameters": [{
+          "name": "movieId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": "ID of the movie"
+        }],
+        "responses": {
+          "200": {
+            "description": "Watchlist item details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistItemSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watchlist item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Watchlists"
+        ],
+        "summary": "Remove a movie from the user's watchlist",
+        "security": [{
+          "bearerAuth": []
+        }],
+        "parameters": [{
+          "name": "movieId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": "ID of the movie"
+        }],
+        "responses": {
+          "204": {
+            "description": "Watchlist item deleted successfully",
+            "$ref": "#/components/responses/SuccessNoData"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watchlist item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserUpdateInput": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "Movie": {
+        "type": "object",
+        "properties": {
+          "movie_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
+          "release_year": {
+            "type": "integer"
+          },
+          "synopsis": {
+            "type": "string"
+          },
+          "poster_url": {
+            "type": "string"
+          },
+          "trailer_url": {
+            "type": "string"
+          },
+          "runtime_minutes": {
+            "type": "integer"
+          },
+          "episode_count": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "released",
+              "airing",
+              "upcoming",
+              "cancelled"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "movie",
+              "tv_series"
+            ]
+          },
+          "average_rating": {
+            "type": "number",
+            "format": "float"
+          },
+          "rating_count": {
+            "type": "integer"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of genre names associated with the movie"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MovieInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "original_title": {
+            "type": "string"
+          },
+          "release_year": {
+            "type": "integer"
+          },
+          "synopsis": {
+            "type": "string"
+          },
+          "poster_url": {
+            "type": "string"
+          },
+          "trailer_url": {
+            "type": "string"
+          },
+          "runtime_minutes": {
+            "type": "integer"
+          },
+          "episode_count": {
+            "type": "integer",
+            "default": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "released",
+              "airing",
+              "upcoming",
+              "cancelled"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "movie",
+              "tv_series"
+            ]
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of genre IDs to associate with the movie"
+          }
+        },
+        "required": [
+          "title",
+          "type"
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movie_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "comment": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the reviewer (from join)"
+          },
+          "avatar_url": {
+            "type": "string",
+            "description": "Avatar URL of the reviewer (from join)"
+          }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rating"
+        ]
+      },
+      "WatchlistItem": {
+        "type": "object",
+        "properties": {
+          "watchlist_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movie_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "watching",
+              "completed",
+              "plan_to_watch",
+              "dropped"
+            ]
+          },
+          "current_episode": {
+            "type": "integer"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "description": "Movie title (from join)"
+          },
+          "poster_url": {
+            "type": "string",
+            "description": "Movie poster URL (from join)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Movie type (from join)"
+          },
+          "release_year": {
+            "type": "integer",
+            "description": "Movie release year (from join)"
+          }
+        }
+      },
+      "WatchlistItemInput": {
+        "type": "object",
+        "properties": {
+          "movieId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "watching",
+              "completed",
+              "plan_to_watch",
+              "dropped"
+            ]
+          },
+          "currentEpisode": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "movieId",
+          "status"
+        ]
+      },
+      "AuthSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              },
+              "token": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "UserSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "MovieSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/Movie"
+          }
+        }
+      },
+      "ReviewSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/Review"
+          }
+        }
+      },
+      "WatchlistItemSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/WatchlistItem"
+          }
+        }
+      },
+      "MoviesListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Movie"
+            }
+          }
+        }
+      },
+      "ReviewsListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          }
+        }
+      },
+      "WatchlistItemsListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WatchlistItem"
+            }
+          }
+        }
+      },
+      "FailResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "fail"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ]
+      }
+    },
+    "responses": {
+      "SuccessNoData": {
+        "description": "No content",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "The response status",
+                  "enum": [
+                    "success"
+                  ]
+                },
+                "data": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The response data"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [{
+    "bearerAuth": []
+  }]
+}
